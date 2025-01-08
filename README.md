@@ -1,2 +1,4 @@
-# greenvault
-GreenVault è un software di gestione per negozi di prodotti vegani. Permette di registrare nuovi prodotti, elencare i prodotti disponibili, registrare le vendite, calcolare i profitti lordi e netti, e offre un menu di aiuto. È utilizzabile da riga di comando per una gestione semplice ed efficiente.
+# GreenVault
+## Your customer-centric management software for Vegan products
+
+GreenVault is a management software for vegan product stores. It allows you to register new products, list available products, record sales, calculate gross and net profits, and offers a help menu. It is command-line based for simple and efficient management.
