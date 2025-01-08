@@ -12,6 +12,10 @@
 
 
 #Import section
+import Inventory
+import Sale
+import Product
+import SalesManager
 
 #Main function
 
