@@ -1,0 +1,42 @@
+{
+    "products" : [
+        {
+            "name": "Prodotto 1",
+            "quantity": 10,
+            "purchase_price": 10.29,
+            "sale_price": 20.45
+        },
+        {
+            "name": "Prodotto 2",
+            "quantity": 50,
+            "purchase_price": 22.29,
+            "sale_price": 50.45
+        }
+    ],
+    "sales" : [
+        {
+            "product": [
+                "Prodotto 1",
+                "Prodotto 2"
+            ],
+            "quantity": [
+                5,
+                10
+            ],
+            "total_price": 34.45
+        },
+        {
+            "product": [
+                "Prodotto 3",
+                "Prodotto 4"
+            ],
+            "quantity": [
+                43,
+                65
+            ],
+            "total_price": 76.45
+        }
+    ],
+    "gross_profits": 90.52,
+    "net_profits": 75.24
+}

@@ -12,56 +12,16 @@
 
 
 #Import section
-import Inventory
-import Sale
-import Product
-import SalesManager
+from ProgramHandler import ProgramHandler
 
 #Main function
 
 def main():
     """
-    Python Main Function, executes program's main loop.
+    Python Main Function, executes program's main loop from start_interaction() in ProgramHandler.
     """
-    try:
-        cmd = None
-
-        while cmd!="chiudi":
-
-            print("Benvenuto in GreenVault, il tuo software di gestione per negozi di prodotti vegani!")
-            cmd = input("Inserisci un comando: ")
-
-            if cmd=="vendita":
-                pass
-                # registra una vendita
-                # ...
-            elif cmd=="profitti":
-                pass
-                # mostra profitti netti e lordi
-                # ...
-            elif cmd=="aggiungi":
-                pass
-                # aggiungi un prodotto al magazzino
-                # ...
-            elif cmd=="elenca":
-                pass
-                # elenca tutti i prodotti nel magazzino
-                # ...
-            elif cmd=="aiuto":
-                pass
-                # mostra i possibili comandi
-                # ...
-            elif cmd=="chiudi":
-                pass
-                # saluta e interrompi il programma
-                # ...
-            else:
-                pass
-                # comando non valido
-                # mostra messaggio di aiuto
-                # ...
-    except Exception as e:
-        print("Errore imprevisto: ", e)
+    ProgramHandler.check_for_file()
+    ProgramHandler.start_interaction()
 
 if __name__ == "__main__":
     main()
