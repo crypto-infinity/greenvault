@@ -7,7 +7,7 @@
 #Description: 
 # GreenVault is a management software for vegan product stores. 
 # It allows you to register new products, list available products, record sales, 
-# calculate gross and net profits, and offers a help menu. 
+# calculate gross and n  et profits, and offers a help menu. 
 # It is command-line based for simple and efficient management.
 
 
@@ -18,10 +18,9 @@ from ProgramHandler import ProgramHandler
 
 def main():
     """
-    Python Main Function, executes program's main loop from start_interaction() in ProgramHandler.
+    Python Main Function, executes program's main loop from load_file() and start_interaction() in ProgramHandler.
     """
-    ProgramHandler.check_for_file()
-    ProgramHandler.start_interaction()
+    program_handler = ProgramHandler()
 
 if __name__ == "__main__":
     main()

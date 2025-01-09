@@ -3,6 +3,8 @@
 #Import section
 import sys
 import os
+import logging
+import json
 
 class ProgramHandler():
     """
@@ -10,11 +12,16 @@ class ProgramHandler():
 
     Creates an instance of Inventory and SalesManager to manage the store's products and sales.
     """
+    #Constants
+
+    FILE_NAME = "greenvault.json"
 
     #Attributes
 
-    _inventory = None
-    _sales_manager = None
+    _inventory = None # Inventory instance
+    _sales_manager = None # SalesManager istance
+    _file_handler = None # file stream
+    file_data = None
 
     #Methods
 
@@ -22,34 +29,76 @@ class ProgramHandler():
         """
         Initialize the ProgramHandler class.
 
+        Provides:
+        - logging options
+        - instances collection
         """
-        pass
 
-    def check_for_file():
-        """
-        Check if the file exists and is readable.
-        """
-        pass
+        logging.basicConfig(
+            filename="app.log",
+            encoding="utf-8",
+            filemode="a",
+            format="{asctime} - {levelname} - {message}",
+            style="{",
+            level=logging.DEBUG,
+            datefmt="%Y-%m-%d %H:%M",
+        )
 
-    def open_file():
-        """
-        Open file for reading and writing.
-        """
-        pass
+        logging.debug("ProgramHandler started.")
 
-    def close_file():
+        try:
+            self.load_file()
+            self.start_interaction()
+        except Exception as e:
+            logging.error(f"An error occured: {e}")
+            self.exit_program()
+
+    def load_file(self):
+        """
+        Check if the file exists and is readable, then opens it for streaming.
+        """
+
+        if os.path.exists(self.FILE_NAME):
+            logging.info("File JSON found.")
+            try:
+                self._open_file()
+            except json.JSONDecodeError as e:  
+                logging.error("File JSON is not consistent: ", e)
+                logging.warning("Creating new file...")
+                sys.exit(0) #Exiting since _create_file() is not implemented yet
+                self._create_file()
+            except Exception as e:
+                logging.critical(f"An error occured, stopping program: {e}")
+                self.exit_program(message="Si è verificato un errore, uscita dall'app in corso...")
+        else:
+            logging.warning("File not found, creating new file...")
+            self._create_file()
+
+    def _open_file(self):
+        """
+        Open file for reading and writing, without truncating. Exception handling made by load_file().
+        """
+    
+        self._file_handler = open(self.FILE_NAME, "a+")
+        self.file_data = json.load(self._file_handler) #error
+        logging.debug(self.file_data)
+        logging.info("File JSON is consistent and loaded.")
+
+    def _close_file(self):
         """
         Close file stream.
         """
         pass
 
-    def create_file():
+    def _create_file(self):
         """
         Creates a new file if it does not exist.
         """
+
+        #do not duplicate file if it already exists
         pass
 
-    def show_help():
+    def show_help(self):
         """
         Show an help menu with all possible commands.
         """
@@ -63,15 +112,15 @@ class ProgramHandler():
         print("• chiudi: esci dal programma")
 
 
-    def exit_program():
+    def exit_program(self, message="Arrivederci, e grazie per aver usato il programma!"):
         """
         Exits the program with a farewell message.
         """
 
-        print("Arrivederci, e grazie per aver usato il programma!")
+        print(message)
         sys.exit(0)
 
-    def start_interaction():
+    def start_interaction(self):
         """
         Starts the main loop of the program after file import or creation.
         """
@@ -105,17 +154,17 @@ class ProgramHandler():
 
                 elif cmd=="aiuto":
                     # mostra i possibili comandi
-                    ProgramHandler.show_help()
+                    self.show_help()
 
                 elif cmd=="chiudi":
                     # saluta e interrompi il programma
-                    ProgramHandler.exit_program()
+                    self.exit_program()
 
                 else:
                     # comando non valido
                     # mostra messaggio di aiuto
                     print("Comando non valido")
-                    ProgramHandler.show_help()
+                    self.show_help()
 
         except Exception as e:
             print("Errore imprevisto: ", e)
