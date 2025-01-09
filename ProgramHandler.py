@@ -5,16 +5,27 @@ import sys
 import os
 import logging
 import json
+import random
+import string
 
 class ProgramHandler():
     """
-    ProgramHandler class, manages the program's main loop.
+    ProgramHandler class, manages the program's main loop: loads file, execute the menu, handles operations.
 
     Creates an instance of Inventory and SalesManager to manage the store's products and sales.
     """
     #Constants
 
     FILE_NAME = "greenvault.json"
+
+    SAMPLE_DICTIONARY = {
+            "products" : [],
+            "sales" : [],
+            "gross_profits": 0.00,
+            "net_profits": 0.00
+    }
+
+    FILE_INDENTATION = 4
 
     #Attributes
 
@@ -47,56 +58,84 @@ class ProgramHandler():
         logging.debug("ProgramHandler started.")
 
         try:
-            self.load_file()
-            self.start_interaction()
+            self._load_inventory()
+            self._start_interaction()
         except Exception as e:
             logging.error(f"An error occured: {e}")
             self.exit_program()
 
-    def load_file(self):
+    def _load_inventory(self):
         """
         Check if the file exists and is readable, then opens it for streaming.
+
+        If it does not exist or if it can't be decoded, a new file is created and the old renamed.
         """
+        
+        try:
+            self._load_file()
 
-        if os.path.exists(self.FILE_NAME):
-            logging.info("File JSON found.")
-            try:
-                self._open_file()
-            except json.JSONDecodeError as e:  
-                logging.error("File JSON is not consistent: ", e)
-                logging.warning("Creating new file...")
-                sys.exit(0) #Exiting since _create_file() is not implemented yet
-                self._create_file()
-            except Exception as e:
-                logging.critical(f"An error occured, stopping program: {e}")
-                self.exit_program(message="Si è verificato un errore, uscita dall'app in corso...")
-        else:
-            logging.warning("File not found, creating new file...")
-            self._create_file()
+        except json.JSONDecodeError as e:
+            logging.error("File JSON is not consistent.")
+            logging.warning("Creating new file...")
 
-    def _open_file(self):
+            self._close_file()
+            self._file_handler = None #reinitialize file handler
+ 
+            self._initialize_file()
+
+        except IOError as e:
+            logging.info("File does not exist. Creating...")
+            self._initialize_file()
+
+        except Exception as e:
+            self._exit_program_with_error(exception=e)
+            
+
+    def _load_file(self):
         """
         Open file for reading and writing, without truncating. Exception handling made by load_file().
         """
     
-        self._file_handler = open(self.FILE_NAME, "a+")
-        self.file_data = json.load(self._file_handler) #error
+        self._file_handler = open(self.FILE_NAME, "r+")
+        self.file_data = json.load(self._file_handler)
         logging.debug(self.file_data)
         logging.info("File JSON is consistent and loaded.")
+
+    def _initialize_file(self):
+        """
+        Creates a new file if it does not exist. Maintain previous files by renaming them.
+        """
+        try:
+
+            logging.info("Creating new file...")
+            with open(self.FILE_NAME, "w") as new_file:
+                new_file = json.dump(self.SAMPLE_DICTIONARY, new_file, indent=self.FILE_INDENTATION)
+                logging.info("File created!")
+            
+            self.__init__(self)
+
+        except Exception as e:
+            self._exit_program_with_error(exception=e)
+                
+        #do not duplicate file if it already exists
 
     def _close_file(self):
         """
         Close file stream.
         """
+        if(not self._file_handler == None):
+            self._file_handler.close()
+            logging.warning("File stream closed.")
+        else:
+            logging.warning("No file has been loaded")
+
+    def save_file(self):
+        """
+        Save file with new data.
+        """
         pass
 
-    def _create_file(self):
-        """
-        Creates a new file if it does not exist.
-        """
 
-        #do not duplicate file if it already exists
-        pass
 
     def show_help(self):
         """
@@ -110,6 +149,7 @@ class ProgramHandler():
         print("• profitti: mostra i profitti totali")
         print("• aiuto: mostra i possibili comandi")
         print("• chiudi: esci dal programma")
+        print("\n")
 
 
     def exit_program(self, message="Arrivederci, e grazie per aver usato il programma!"):
@@ -120,7 +160,24 @@ class ProgramHandler():
         print(message)
         sys.exit(0)
 
-    def start_interaction(self):
+    def _exit_program_with_error(self, exception="Si è verificato un errore, uscita dall'app in corso.."):
+        """
+        Exits the program with an error message.
+        """
+        logging.critical(f"An error occured, stopping program: {exception}")
+        self.exit_program(message=exception)
+
+    def _create_random_string(length=8):
+        """
+        Creates a random string.
+        """
+
+        letters = string.ascii_lowercase
+        result_str = ''.join(random.choice(letters) for i in range(length))
+        
+        return result_str
+
+    def _start_interaction(self):
         """
         Starts the main loop of the program after file import or creation.
         """
@@ -167,7 +224,7 @@ class ProgramHandler():
                     self.show_help()
 
         except Exception as e:
-            print("Errore imprevisto: ", e)
+            self._exit_program_with_error(exception=e)
 
 
     
