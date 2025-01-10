@@ -1,12 +1,23 @@
 #GreenVault ProgramHandler
 
 #Import section
+
+#GreenVault Classes
+
+from FileHandler import FileHandler
+from Inventory import Inventory
+from SalesManager import SalesManager
+
+#Standard library classes
+
 import sys
 import os
 import logging
 import json
 import random
 import string
+
+# Class definition
 
 class ProgramHandler():
     """
@@ -16,23 +27,20 @@ class ProgramHandler():
     """
     #Constants
 
-    FILE_NAME = "greenvault.json"
-
     SAMPLE_DICTIONARY = {
-            "products" : [],
-            "sales" : [],
-            "gross_profits": 0.00,
-            "net_profits": 0.00
+        "products" : [],
+        "sales" : [],
+        "gross_profits": 0.00,
+        "net_profits": 0.00
     }
-
-    FILE_INDENTATION = 4
 
     #Attributes
 
-    _inventory = None # Inventory instance
-    _sales_manager = None # SalesManager istance
-    _file_handler = None # file stream
-    file_data = None
+    inventory = None # Inventory instance
+    sales_manager = None # SalesManager istance
+    file_handler = None # FileHandler class instance
+
+    database = SAMPLE_DICTIONARY
 
     #Methods
 
@@ -58,11 +66,28 @@ class ProgramHandler():
         logging.debug("ProgramHandler started.")
 
         try:
+            self.file_handler = FileHandler(ProgramHandlerInstance=self)
+            self._inventory = Inventory(ProgramHandlerInstance=self)
+            self._sales_manager = SalesManager(ProgramHandlerInstance=self)
+
+            logging.debug("Instances FileHandler, Inventory and SalesManager created.")
+
+            self.start_program()
+            
+        except Exception as e:
+            logging.error(f"An error occured: {e}")
+            self.exit_program_with_error()
+
+    def start_program(self):
+        """
+        Starts the program by loading the inventory and starting the interaction.
+        """
+        try:
             self._load_inventory()
             self._start_interaction()
         except Exception as e:
             logging.error(f"An error occured: {e}")
-            self.exit_program()
+            self.exit_program_with_error()
 
     def _load_inventory(self):
         """
@@ -72,70 +97,23 @@ class ProgramHandler():
         """
         
         try:
-            self._load_file()
+            self.file_handler.load_file()
 
         except json.JSONDecodeError as e:
             logging.error("File JSON is not consistent.")
             logging.warning("Creating new file...")
 
-            self._close_file()
-            self._file_handler = None #reinitialize file handler
+            self.file_handler.close_file()
+            self.file_handler.file_stream = None #reinitialize file handler
  
-            self._initialize_file()
+            self.file_handler.initialize_file()
 
-        except IOError as e:
+        except FileNotFoundError as e:
             logging.info("File does not exist. Creating...")
-            self._initialize_file()
+            self.file_handler.initialize_file()
 
         except Exception as e:
-            self._exit_program_with_error(exception=e)
-            
-
-    def _load_file(self):
-        """
-        Open file for reading and writing, without truncating. Exception handling made by load_file().
-        """
-    
-        self._file_handler = open(self.FILE_NAME, "r+")
-        self.file_data = json.load(self._file_handler)
-        logging.debug(self.file_data)
-        logging.info("File JSON is consistent and loaded.")
-
-    def _initialize_file(self):
-        """
-        Creates a new file if it does not exist. Maintain previous files by renaming them.
-        """
-        try:
-
-            logging.info("Creating new file...")
-            with open(self.FILE_NAME, "w") as new_file:
-                new_file = json.dump(self.SAMPLE_DICTIONARY, new_file, indent=self.FILE_INDENTATION)
-                logging.info("File created!")
-            
-            self.__init__(self)
-
-        except Exception as e:
-            self._exit_program_with_error(exception=e)
-                
-        #do not duplicate file if it already exists
-
-    def _close_file(self):
-        """
-        Close file stream.
-        """
-        if(not self._file_handler == None):
-            self._file_handler.close()
-            logging.warning("File stream closed.")
-        else:
-            logging.warning("No file has been loaded")
-
-    def save_file(self):
-        """
-        Save file with new data.
-        """
-        pass
-
-
+            self.exit_program_with_error(exception=e)
 
     def show_help(self):
         """
@@ -160,7 +138,7 @@ class ProgramHandler():
         print(message)
         sys.exit(0)
 
-    def _exit_program_with_error(self, exception="Si è verificato un errore, uscita dall'app in corso.."):
+    def exit_program_with_error(self, exception="Si è verificato un errore, uscita dall'app in corso.."):
         """
         Exits the program with an error message.
         """
@@ -181,6 +159,8 @@ class ProgramHandler():
         """
         Starts the main loop of the program after file import or creation.
         """
+        logging.info("Starting user interaction...")
+
         try:
             cmd = None
 
@@ -190,6 +170,7 @@ class ProgramHandler():
                 cmd = input("Inserisci un comando: ")
 
                 if cmd=="vendita":
+                    self._inventory.test()
                     pass
                     # registra una vendita
                     # ...
@@ -224,7 +205,7 @@ class ProgramHandler():
                     self.show_help()
 
         except Exception as e:
-            self._exit_program_with_error(exception=e)
+            self.exit_program_with_error(exception=e)
 
 
     
