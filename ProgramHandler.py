@@ -17,6 +17,8 @@ import json
 import random
 import string
 
+from collections import defaultdict
+
 # Class definition
 
 class ProgramHandler():
@@ -27,20 +29,13 @@ class ProgramHandler():
     """
     #Constants
 
-    SAMPLE_DICTIONARY = {
-        "products" : [],
-        "sales" : [],
-        "gross_profits": 0.00,
-        "net_profits": 0.00
-    }
-
     #Attributes
 
     inventory = None # Inventory instance
     sales_manager = None # SalesManager istance
     file_handler = None # FileHandler class instance
 
-    database = SAMPLE_DICTIONARY
+    database = defaultdict()
 
     #Methods
 
@@ -50,8 +45,11 @@ class ProgramHandler():
 
         Provides:
         - logging options
-        - instances collection
+        - instances collection settings
+        - database initialization settings
         """
+
+        #Logging configuration
 
         logging.basicConfig(
             filename="app.log",
@@ -65,20 +63,33 @@ class ProgramHandler():
 
         logging.debug("ProgramHandler started.")
 
+        #Database initialization
+
+        self.database = defaultdict()
+
+        self.database["products"] = []
+        self.database["sales"] = []
+        self.database["gross_profits"] = 0.00
+        self.database["net_profits"] = 0.00
+
+        logging.debug("Database initialized.")
+
+        #Instances creation and program start
+
         try:
-            self.file_handler = FileHandler(ProgramHandlerInstance=self)
-            self._inventory = Inventory(ProgramHandlerInstance=self)
-            self._sales_manager = SalesManager(ProgramHandlerInstance=self)
+            self.file_handler = FileHandler(self)
+            self.inventory = Inventory(self)
+            self.sales_manager = SalesManager(self)
 
             logging.debug("Instances FileHandler, Inventory and SalesManager created.")
 
-            self.start_program()
+            self._start_program()
             
         except Exception as e:
             logging.error(f"An error occured: {e}")
             self.exit_program_with_error()
 
-    def start_program(self):
+    def _start_program(self):
         """
         Starts the program by loading the inventory and starting the interaction.
         """
@@ -132,9 +143,12 @@ class ProgramHandler():
 
     def exit_program(self, message="Arrivederci, e grazie per aver usato il programma!"):
         """
-        Exits the program with a farewell message.
-        """
+        Exits the program with a farewell message, saving the file.
 
+        Args:
+        message (str): The farewell message to be displayed. Defaults to a sample.
+        """
+        self.file_handler.save_file()
         print(message)
         sys.exit(0)
 
@@ -154,6 +168,14 @@ class ProgramHandler():
         result_str = ''.join(random.choice(letters) for i in range(length))
         
         return result_str
+    
+    def _can_cast(self, source, dest_type):
+        try:
+            dest_type(source)
+            return True
+        
+        except ValueError:
+            return False
 
     def _start_interaction(self):
         """
@@ -163,14 +185,13 @@ class ProgramHandler():
 
         try:
             cmd = None
+            print("Benvenuto in GreenVault, il tuo software di gestione per negozi di prodotti vegani!")
 
             while cmd != "chiudi":
-
-                print("Benvenuto in GreenVault, il tuo software di gestione per negozi di prodotti vegani!")
+                
                 cmd = input("Inserisci un comando: ")
 
                 if cmd=="vendita":
-                    self._inventory.test()
                     pass
                     # registra una vendita
                     # ...
@@ -181,14 +202,72 @@ class ProgramHandler():
                     # ...
 
                 elif cmd=="aggiungi":
-                    pass
                     # aggiungi un prodotto al magazzino
-                    # ...
+                    try:
+
+                        
+                        #Input Checks
+
+                        #We assume products are only lowercases without leading and trailing whitespaces, for querying purposes.
+                        product_name = input("Nome del prodotto (verrà convertito in minuscolo): ")
+                        while(product_name == "" or product_name == None or str.isspace(product_name)):
+                            logging.info("Product name is empty or not valid.")
+                            print("Nome del prodotto non valido.")
+                            product_name = input("Nome del prodotto: ")
+
+                        product_name = self._inventory.preprocess_item_name(product_name)
+
+                        product_quantity = input("Quantità: ")
+                        while(self._can_cast(product_quantity, int) == False):
+                            logging.info("Product quantity is not an integer.")
+                            print("La Quantità non è un numero valido!")
+                            product_quantity = input("Quantità: ")            
+                        
+                        product_quantity = int(product_quantity)
+                        while(product_quantity <= 0):
+                            logging.info("Product quantity is negative.")
+                            print("La Quantità non può essere negativa o zero!")
+                            product_quantity = input("Quantità: ")
+                        
+                        product_index = self._inventory.get_item_index_from_name(product_name)
+
+                        if(product_index == None):
+                            product_purchase_price = input("Prezzo di acquisto: ")
+                            while(self._can_cast(product_purchase_price, float) == False):
+                                logging.info("Product quantity is not an integer.")
+                                print("Il prezzo di acquisto non è un numero valido!")
+                                product_purchase_price = input("Prezzo di acquisto: ")
+                            
+                            product_purchase_price = float(product_purchase_price)
+                            while(product_purchase_price < 0):
+                                logging.info("Product quantity is negative.")
+                                print("Il prezzo di acquisto non può essere negativo!")
+                                product_purchase_price = input("Prezzo di acquisto: ")
+                                #We'll accept the case where the purchase price is zero, as it may be a free sample or a gift.
+
+                            product_sale_price = input("Prezzo di vendita: ")
+                            while(self._can_cast(product_sale_price, float) == False):
+                                logging.info("Product quantity is not an integer.")
+                                print("Il prezzo di vendita non è un numero valido!")
+                                product_sale_price = input("Prezzo di vendita: ")
+                            
+                            product_sale_price = float(product_sale_price)
+                            while(product_sale_price <= 0):
+                                logging.info("Product quantity is negative.")
+                                print("Il prezzo di vendita non può essere negativo o zero!")
+                                product_sale_price = float(product_sale_price)                        
+                        
+                            self._inventory.add_product(product_name, product_quantity, product_purchase_price, product_sale_price)
+                        else:
+                            logging.info("Product already exists, updating quantity.")
+                            self._inventory.update_product(product_index, product_quantity)
+
+                    except ValueError as e:
+                        print(e)
 
                 elif cmd=="elenca":
-                    pass
                     # elenca tutti i prodotti nel magazzino
-                    # ...
+                    self.inventory.list_products()
 
                 elif cmd=="aiuto":
                     # mostra i possibili comandi
