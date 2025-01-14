@@ -28,7 +28,7 @@ class FileHandler():
 
     #Methods
 
-    def __init__(self, *args, ProgramHandlerInstance=None):
+    def __init__(self, ProgramHandlerInstance):
         self.HANDLER_REF = ProgramHandlerInstance
 
     def load_file(self):

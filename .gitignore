@@ -173,3 +173,4 @@ cython_debug/
 # Venv configs
 /greenvault
 app.log
+_backup
