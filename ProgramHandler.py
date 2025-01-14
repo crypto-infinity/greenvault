@@ -19,6 +19,8 @@ import string
 
 from collections import defaultdict
 
+from collections import defaultdict
+
 # Class definition
 
 class ProgramHandler():
@@ -176,6 +178,79 @@ class ProgramHandler():
         
         except ValueError:
             return False
+        
+    def get_input_from_user(self, attribute):
+        """
+        Gets user input for specified attribute. 
+
+        Args:
+        attribute (str): The attribute to get.
+
+        Returns:
+        str: the user input, preprocessed if applicable.
+        """
+
+        try:
+            if(attribute == "product_name"):
+
+                product_name = input("Nome del prodotto: ")
+                while(product_name == "" or product_name == None or str.isspace(product_name)):
+                    logging.info("Product name is empty or not valid.")
+                    print("Nome del prodotto non valido.")
+                    product_name = input("Nome del prodotto: ")
+
+                product_name = self._inventory.preprocess_item_name(product_name)
+                return product_name
+            
+            if(attribute == "product_quantity"):
+
+                product_quantity = input("Quantità: ")
+                while(self._can_cast(product_quantity, int) == False):
+                    logging.info("Product quantity is not an integer.")
+                    print("La Quantità non è un numero valido!")
+                    product_quantity = input("Quantità: ")            
+                
+                product_quantity = int(product_quantity)
+                while(product_quantity <= 0):
+                    logging.info("Product quantity is negative.")
+                    print("La Quantità non può essere negativa o zero!")
+                    product_quantity = input("Quantità: ")
+
+                return product_quantity
+            
+            if(attribute == "product_purchase_price"):
+                product_purchase_price = input("Prezzo di acquisto: ")
+                while(self._can_cast(product_purchase_price, float) == False):
+                    logging.info("Product quantity is not an integer.")
+                    print("Il prezzo di acquisto non è un numero valido!")
+                    product_purchase_price = input("Prezzo di acquisto: ")
+                
+                product_purchase_price = float(product_purchase_price)
+                while(product_purchase_price < 0):
+                    logging.info("Product quantity is negative.")
+                    print("Il prezzo di acquisto non può essere negativo!")
+                    product_purchase_price = input("Prezzo di acquisto: ")
+                    #We'll accept the case where the purchase price is zero, as it may be a free sample or a gift.
+
+                return product_purchase_price
+            
+            if(attribute == "product_sale_price"):
+                product_sale_price = input("Prezzo di vendita: ")
+                while(self._can_cast(product_sale_price, float) == False):
+                    logging.info("Product quantity is not an integer.")
+                    print("Il prezzo di vendita non è un numero valido!")
+                    product_sale_price = input("Prezzo di vendita: ")
+                
+                product_sale_price = float(product_sale_price)
+                while(product_sale_price <= 0):
+                    logging.info("Product quantity is negative.")
+                    print("Il prezzo di vendita non può essere negativo o zero!")
+                    product_sale_price = float(product_sale_price)
+
+                return product_sale_price
+
+        except ValueError as e:
+            print(e)
 
     def _start_interaction(self):
         """
@@ -193,6 +268,7 @@ class ProgramHandler():
 
                 if cmd=="vendita":
                     pass
+
                     # registra una vendita
                     # ...
 
@@ -203,63 +279,23 @@ class ProgramHandler():
 
                 elif cmd=="aggiungi":
                     # aggiungi un prodotto al magazzino
-                    try:
+                    try:             
+                        product_name = self.get_input_from_user("product_name")
 
-                        
-                        #Input Checks
-
-                        #We assume products are only lowercases without leading and trailing whitespaces, for querying purposes.
-                        product_name = input("Nome del prodotto (verrà convertito in minuscolo): ")
-                        while(product_name == "" or product_name == None or str.isspace(product_name)):
-                            logging.info("Product name is empty or not valid.")
-                            print("Nome del prodotto non valido.")
-                            product_name = input("Nome del prodotto: ")
-
-                        product_name = self._inventory.preprocess_item_name(product_name)
-
-                        product_quantity = input("Quantità: ")
-                        while(self._can_cast(product_quantity, int) == False):
-                            logging.info("Product quantity is not an integer.")
-                            print("La Quantità non è un numero valido!")
-                            product_quantity = input("Quantità: ")            
-                        
-                        product_quantity = int(product_quantity)
-                        while(product_quantity <= 0):
-                            logging.info("Product quantity is negative.")
-                            print("La Quantità non può essere negativa o zero!")
-                            product_quantity = input("Quantità: ")
-                        
                         product_index = self._inventory.get_item_index_from_name(product_name)
 
                         if(product_index == None):
-                            product_purchase_price = input("Prezzo di acquisto: ")
-                            while(self._can_cast(product_purchase_price, float) == False):
-                                logging.info("Product quantity is not an integer.")
-                                print("Il prezzo di acquisto non è un numero valido!")
-                                product_purchase_price = input("Prezzo di acquisto: ")
-                            
-                            product_purchase_price = float(product_purchase_price)
-                            while(product_purchase_price < 0):
-                                logging.info("Product quantity is negative.")
-                                print("Il prezzo di acquisto non può essere negativo!")
-                                product_purchase_price = input("Prezzo di acquisto: ")
-                                #We'll accept the case where the purchase price is zero, as it may be a free sample or a gift.
+                            logging.info("Product does not exist, adding a new entry.")
 
-                            product_sale_price = input("Prezzo di vendita: ")
-                            while(self._can_cast(product_sale_price, float) == False):
-                                logging.info("Product quantity is not an integer.")
-                                print("Il prezzo di vendita non è un numero valido!")
-                                product_sale_price = input("Prezzo di vendita: ")
-                            
-                            product_sale_price = float(product_sale_price)
-                            while(product_sale_price <= 0):
-                                logging.info("Product quantity is negative.")
-                                print("Il prezzo di vendita non può essere negativo o zero!")
-                                product_sale_price = float(product_sale_price)                        
+                            product_quantity = self.get_input_from_user("product_quantity")
+                            product_purchase_price = self.get_input_from_user("product_purchase_price")
+                            product_sale_price = self.get_input_from_user("product_sale_price")                        
                         
                             self._inventory.add_product(product_name, product_quantity, product_purchase_price, product_sale_price)
                         else:
                             logging.info("Product already exists, updating quantity.")
+
+                            product_quantity = self.get_input_from_user("product_quantity")
                             self._inventory.update_product(product_index, product_quantity)
 
                     except ValueError as e:
