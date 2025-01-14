@@ -37,6 +37,7 @@ class SalesManager():
             product_sale["product"] = product_list
             product_sale["quantity"] = product_quantities
             product_sale["total_price"] = 0.00
+            #"net_absolute_profit": sale_price * quantity - purchase_price * quantity
             
             print("VENDITA REGISTRATA\n")
 
@@ -56,7 +57,7 @@ class SalesManager():
 
             self.HANDLER_REF.database["sales"].append(product_sale)
 
-            print(f"Totale: €{product_sale['total_price']}\n")
+            print(f"Totale: €{product_sale['total_price']:.2f}\n")
 
             self.HANDLER_REF.file_handler.save_file()
             return True
