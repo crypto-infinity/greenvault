@@ -13,13 +13,11 @@ class SalesManager():
     HANDLER_REF = None
     
     #Attributes
-    sales = []
 
     #Methods
 
     def __init__(self, *args, ProgramHandlerInstance=None):
         self.HANDLER_REF = ProgramHandlerInstance
-        self.sales = self.HANDLER_REF.database["sales"]
 
     def record_sale(self):
         """

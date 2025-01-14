@@ -39,11 +39,6 @@ class Inventory():
 
         logging.debug("User requested to add a product to the store.")
 
-        #We assume products are only lowercases without leading and trailing whitespaces, for querying purposes.
-        name = self.preprocess_item_name(name)
-
-        #For instance, tofu and tofu2 are two different products. Same with tofu and tofus.
-
         new_product = {
             "name": name,
             "quantity": quantity,
@@ -156,6 +151,8 @@ class Inventory():
 
         Returns the preprocessed item name.
         """
+        
+        #For example, tofu and tofu2 are two different products. Same with tofu and tofus
         return str.lower(item_name).lstrip().rstrip()
     
         
