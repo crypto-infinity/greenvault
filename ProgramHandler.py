@@ -19,8 +19,6 @@ import string
 
 from collections import defaultdict
 
-from collections import defaultdict
-
 # Class definition
 
 class ProgramHandler():
@@ -199,7 +197,7 @@ class ProgramHandler():
                     print("Nome del prodotto non valido.")
                     product_name = input("Nome del prodotto: ")
 
-                product_name = self._inventory.preprocess_item_name(product_name)
+                product_name = self.inventory.preprocess_item_name(product_name)
                 return product_name
             
             if(attribute == "product_quantity"):
@@ -267,7 +265,53 @@ class ProgramHandler():
                 cmd = input("Inserisci un comando: ")
 
                 if cmd=="vendita":
-                    pass
+
+                    try:
+                        product_list = []
+                        product_quantities = []
+                        product_indexes = []
+
+                        user_key = "si"
+
+                        while(user_key == "si"):
+
+                            product_name = self.get_input_from_user("product_name")
+
+                            product_index = self.inventory.get_item_index_from_name(product_name)
+
+                            if(product_index == None):
+                                logging.info(f"Product not available in store.")
+                                print(f"Il prodotto {product_name} non è disponibile a magazzino, perciò non è possibile procedere con la vendita.")
+                                continue
+                            
+                            product_quantity = self.get_input_from_user("product_quantity")
+
+                            if(product_quantity > self.database["products"][product_index]["quantity"]):
+                                logging.info(f"Product does not have enough quantity for specified sell.")
+                                print(f"Il prodotto {product_name} non possiede a magazzino sufficienti scorte, perciò non è possibile procedere con la vendita.")
+                                continue
+
+                            logging.info(f"Product {product_name} available for sell for quantity {product_quantity}")
+
+                            product_list.append(product_name)
+                            product_quantities.append(product_quantity)
+                            product_indexes.append(product_index)
+
+                            user_key = input("Aggiungere un altro prodotto ? (si/no): ")
+
+                            while(user_key != "si" and user_key != "no"):
+                                print("Comando non valido.")
+                                user_key = input("Aggiungere un altro prodotto ? (si/no): ")
+                    
+
+                        self.sales_manager.record_sale(product_list, product_quantities, product_indexes)
+
+                    except ValueError as e:
+                        print(e)
+
+                    except Exception as e:
+                        self.exit_program_with_error(exception=e)
+                        
 
                     # registra una vendita
                     # ...
@@ -282,7 +326,7 @@ class ProgramHandler():
                     try:             
                         product_name = self.get_input_from_user("product_name")
 
-                        product_index = self._inventory.get_item_index_from_name(product_name)
+                        product_index = self.inventory.get_item_index_from_name(product_name)
 
                         if(product_index == None):
                             logging.info("Product does not exist, adding a new entry.")
@@ -291,12 +335,12 @@ class ProgramHandler():
                             product_purchase_price = self.get_input_from_user("product_purchase_price")
                             product_sale_price = self.get_input_from_user("product_sale_price")                        
                         
-                            self._inventory.add_product(product_name, product_quantity, product_purchase_price, product_sale_price)
+                            self.inventory.add_product(product_name, product_quantity, product_purchase_price, product_sale_price)
                         else:
                             logging.info("Product already exists, updating quantity.")
 
                             product_quantity = self.get_input_from_user("product_quantity")
-                            self._inventory.update_product(product_index, product_quantity)
+                            self.inventory.update_product(product_index, product_quantity)
 
                     except ValueError as e:
                         print(e)

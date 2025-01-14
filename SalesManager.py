@@ -20,58 +20,78 @@ class SalesManager():
     def __init__(self, ProgramHandlerInstance):
         self.HANDLER_REF = ProgramHandlerInstance
 
-    def record_sale(self):
+    def record_sale(self, product_list, product_quantities, product_indexes):
         """
         Record a sale in the store.
+
+        Args:
+        product_list (list of str): list of products to be added.
+        product_quantities (list of int): list of quantities of specified index in product_list to be added to the sell manager.
 
         Returns True if Sales has been saved, False otherwise.
         """
 
-        product_sale = defaultdict()
-        product_sale["product"] = []
-        product_sale["quantity"] = []
+        try:
+            product_sale = defaultdict()
 
-        user_key = "si"
-
-        while(user_key != "no"):
-            product_name = self.HANDLER_REF.get_user_input(acquire_prices=False, acquire_name_only=True)
-
-            product_index = self.HANDLER_REF.inventory.get_item_index_from_name(product_name)
-
-            if(product_index == None):
-                logging.info(f"Product not available in store.")
-                print(f"Il prodotto {product_name} non è disponibile a magazzino, perciò non è possibile procedere con la vendita.")
-
-                return False
+            product_sale["product"] = product_list
+            product_sale["quantity"] = product_quantities
+            product_sale["total_price"] = 0.00
             
-            product_quantity= self.HANDLER_REF.get_user_input(acquire_prices=False, acquire_name_only=False, acquire_remaining_info=True)
-            
-            if(product_quantity > self.HANDLER_REF.database["products"][product_index]):
-                logging.info(f"Product does not have enough quantity for specified sell.")
-                print(f"Il prodotto {product_name} non possiede a magazzino sufficienti scorte, perciò non è possibile procedere con la vendita.")
+            print("VENDITA REGISTRATA\n")
 
-                return False
+            for i, item in enumerate(product_sale["product"]):
+                current_item_price = self.HANDLER_REF.database["products"][product_indexes[i]]["sale_price"] * product_sale["quantity"][i]
+                product_sale["total_price"] += current_item_price
 
-            logging.info(f"Product {product_name} available for sell for quantity {product_quantity}")
+                print(f"{product_sale['quantity'][i]} X {product_sale['product'][i]} : €{current_item_price}")
 
-            product_sale["product"].append(product_name)
-            product_sale["quantity"].append(product_quantity)
+                remaining_quantity = self.HANDLER_REF.database["products"][product_indexes[i]]["quantity"] - product_sale["quantity"][i]
+                
+                if(remaining_quantity == 0):
+                    self.HANDLER_REF.database["products"].pop(product_indexes[i])
+                else:
+                    self.HANDLER_REF.database["products"][product_indexes[i]]["quantity"] = remaining_quantity
 
-            user_key = input("Aggiungere un altro prodotto ? (si/no): ")
 
-            if(user_key != "si" or user_key != "no"):
-                print("Comando non valido.")
-                user_key = input("Aggiungere un altro prodotto ? (si/no): ")
-        
-        self.HANDLER_REF.database["sales"].append(product_sale)
+            self.HANDLER_REF.database["sales"].append(product_sale)
 
-        return True
+            print(f"Totale: €{product_sale['total_price']}\n")
+
+            self.HANDLER_REF.file_handler.save_file()
+            return True
+
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            return False
 
     def list_sales(self):
         """
         List all sales in the store.
+
+        Returns None if there are no sales, True if there are sales.
         """
-        pass
+        logging.debug("User requested to list sales.")
+
+        if(len(self.HANDLER_REF.database["sales"]) == 0):
+            print("Nessuna vendita trovata.")
+            return None
+        
+        for index, sale in enumerate(self.HANDLER_REF.database["sales"]):
+
+            if(index == 0):
+                print(f"PRODOTTI\tQUANTITA'\n")
+
+            for i, item in enumerate(sale["product"]):
+                print(f"{str.capitalize(item[i])}", end="")
+
+            for i, item in enumerate(sale["quantity"]):
+                print(f" {item[i]}")
+
+            print(f"Valore totale della vendita: €{sale['total_price']}")    
+
+        print("\n")
+        return True
 
     def calculate_gross_profit(self):
         """

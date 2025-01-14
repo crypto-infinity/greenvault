@@ -50,6 +50,7 @@ class Inventory():
         logging.info(f"Added product {name}.")
 
         print(f"AGGIUNTO: {name} X {quantity}")
+        self.HANDLER_REF.file_handler.save_file()
 
         return True
 
@@ -91,7 +92,7 @@ class Inventory():
         for index, product in enumerate(self.HANDLER_REF.database["products"]):
 
             if(index == 0):
-                print(f"PRODOTTO QUANTITA' PREZZO\n")
+                print(f"PRODOTTO\tQUANTITA'\tPREZZO\n")
  
             print(f"{str.capitalize(product['name'])}\t {product['quantity']}\t   €{product['sale_price']}")
 

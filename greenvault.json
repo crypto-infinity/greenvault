@@ -2,24 +2,39 @@
     "products": [
         {
             "name": "seitan",
-            "quantity": 5,
+            "quantity": 4,
             "purchase_price": 3.0,
             "sale_price": 5.49
         },
         {
             "name": "tofu",
-            "quantity": 10,
+            "quantity": 5,
             "purchase_price": 2.2,
             "sale_price": 4.19
-        },
-        {
-            "name": "insalata",
-            "quantity": 15,
-            "purchase_price": 9.99,
-            "sale_price": 15.56
         }
     ],
-    "sales": [],
+    "sales": [
+        {
+            "product": [
+                "seitan",
+                "tofu"
+            ],
+            "quantity": [
+                1,
+                5
+            ],
+            "total_price": 26.440000000000005
+        },
+        {
+            "product": [
+                "insalata"
+            ],
+            "quantity": [
+                15
+            ],
+            "total_price": 233.4
+        }
+    ],
     "gross_profits": 0.0,
     "net_profits": 0.0
 }
