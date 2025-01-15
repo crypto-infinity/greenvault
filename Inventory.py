@@ -5,9 +5,9 @@ import logging
 
 class Inventory():
     """
-    Manages the store's products (Product.py) and their functions.
+    Manages the store's products and their functions.
 
-    Name is the primary key for products. add_product() will not add a product with the same name as an existing one.
+    A product's Name is the primary key for products. add_product() will not add a product with the same name as an existing one.
     """
 
     #Constants
@@ -18,6 +18,9 @@ class Inventory():
     #Methods
 
     def __init__(self, ProgramHandlerInstance):
+        """
+        Initializes the class and its reference to the ProgramHandler instance.
+        """
         self.HANDLER_REF = ProgramHandlerInstance
 
     def add_product(self, name, quantity, purchase_price, sale_price):
@@ -50,6 +53,7 @@ class Inventory():
         logging.info(f"Added product {name}.")
 
         print(f"AGGIUNTO: {name} X {quantity}")
+
         self.HANDLER_REF.file_handler.save_file()
 
         return True
@@ -74,6 +78,7 @@ class Inventory():
             return True
         
         else:
+
             logging.info("Product not found.")
             return None
 
@@ -83,18 +88,20 @@ class Inventory():
 
         Returns None if there are no products, True if there are products.
         """
+
         logging.debug("User requested to list products.")
 
         if(len(self.HANDLER_REF.database["products"]) == 0):
+
             print("Nessun prodotto trovato.")
             return None
         
         for index, product in enumerate(self.HANDLER_REF.database["products"]):
 
             if(index == 0):
-                print(f"PRODOTTO\tQUANTITA'\tPREZZO\n")
+                print(f"{'PRODOTTO'.ljust(15)}{'QUANTITA\''.ljust(10)}{'PREZZO'.ljust(10)}\n")
  
-            print(f"{str.capitalize(product['name'])}\t {product['quantity']}\t   €{product['sale_price']}")
+            print(f"{str.capitalize(product['name']).ljust(15)}{str(product['quantity']).ljust(10)}€{str(product['sale_price']).ljust(10)}")
 
         print("\n")
         return True
@@ -105,7 +112,6 @@ class Inventory():
 
         Args:
 
-        self (Inventory): Inventory instance.
         product_index (int): The index of the product to be updated.
         new_quantity (int): The new quantity of the product. If not set, won't be updated.
 
@@ -114,13 +120,16 @@ class Inventory():
 
         logging.debug("User requested to update products.")
 
-        if(new_quantity != None): 
+        if(new_quantity != None):
+
             self.HANDLER_REF.database["products"][product_index]["quantity"] += new_quantity
             logging.info(f"Updated product with quantity {new_quantity}.")
             print(f"Aggiornato il prodotto con quantità {new_quantity}.")
 
             return True
+        
         else:
+
             logging.info("Product not found.")
             return None
 
@@ -133,9 +142,11 @@ class Inventory():
 
         Returns none if there's no item with that name.
         """
+
         item_name = self.preprocess_item_name(item_name)
 
         for index, product in enumerate(self.HANDLER_REF.database["products"]):
+
             if product["name"] == item_name:
                 logging.debug(f"Product found at index {index}.")
                 return index
@@ -150,7 +161,7 @@ class Inventory():
         Args:
         item_name (str): The name of the item to be preprocessed.
 
-        Returns the preprocessed item name.
+        Returns the preprocessed item name: str.lower(item_name).lstrip().rstrip().
         """
         
         #For example, tofu and tofu2 are two different products. Same with tofu and tofus

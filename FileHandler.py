@@ -2,12 +2,11 @@
 
 #Import section
 
-#Greenvault classes
+    #Greenvault classes
 import ProgramHandler
 
-#Standard library classes
+    #Standard library classes
 import logging
-import os
 import json
 
 class FileHandler():
@@ -29,15 +28,21 @@ class FileHandler():
     #Methods
 
     def __init__(self, ProgramHandlerInstance):
+        """
+        Initializes the class and its reference to the ProgramHandler instance.
+        """
         self.HANDLER_REF = ProgramHandlerInstance
 
     def load_file(self):
         """
         Open file for reading and writing, without truncating.
+
+        Exception handling made in ProgramHandler.py.
         """
 
         self.file_stream = open(self.FILE_NAME, "r+")
         self.HANDLER_REF.database = json.load(self.file_stream)
+
         logging.debug(self.HANDLER_REF.database)
         logging.info("File JSON is consistent and loaded.")
 
@@ -59,24 +64,28 @@ class FileHandler():
             self.HANDLER_REF.start_program()
 
         except Exception as e:
-            ProgramHandler.ProgramHandler.exit_program_with_error(self.HANDLER_REF, exception=e)
-                
-        #do not duplicate file if it already exists
+            self.HANDLER_REF.exit_program_with_error(exception=e)
 
     def close_file(self):
         """
         Close file stream.
         """
+        logging.info("Closing file stream.")
+        
         if(not self.file_stream == None):
+
             self.file_stream.close()
             logging.warning("File stream closed.")
+
         else:
+
             logging.warning("No file has been loaded")
 
     def save_file(self):
         """
-        Dump file_data into file_stream and save it.
+        Dumps database (HANDLER_REF.database) into file_stream and flushes it into disk.
         """
+
         try:
             if(self.file_stream == None):
                 logging.error("No file has been loaded.")
@@ -84,13 +93,17 @@ class FileHandler():
             else:
                 self.file_stream.seek(0)
                 json.dump(self.HANDLER_REF.database, self.file_stream, indent=self.FILE_INDENTATION)
-                self.file_stream.truncate() #servirà?
+
+                self.file_stream.truncate()
                 self.file_stream.flush()
+
                 logging.info("File saved.")
 
         except IOError as e:
+
             logging.error("File not saved.")
-            ProgramHandler.ProgramHandler.exit_program_with_error(exception=e)
+            self.HANDLER_REF.exit_program_with_error(exception=e)
 
         except Exception as e:
-            ProgramHandler.ProgramHandler.exit_program_with_error(exception=e)
+
+            self.HANDLER_REF.exit_program_with_error(exception=e)

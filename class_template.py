@@ -14,5 +14,8 @@ class TestClass():
 
     #Methods
 
-    def __init__(self, *args, ProgramHandlerClass=None):
+    def __init__(self, ProgramHandlerClass):
+        """
+        Initializes class and its reference to ProgramHandler instance.
+        """
         self.HANDLER_REF = ProgramHandlerClass

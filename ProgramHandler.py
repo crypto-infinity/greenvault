@@ -2,16 +2,15 @@
 
 #Import section
 
-#GreenVault Classes
+    #GreenVault Classes
 
 from FileHandler import FileHandler
 from Inventory import Inventory
 from SalesManager import SalesManager
 
-#Standard library classes
+    #Standard library classes
 
 import sys
-import os
 import logging
 import json
 import random
@@ -41,7 +40,7 @@ class ProgramHandler():
 
     def __init__(self, *args):
         """
-        Initialize the ProgramHandler class.
+        Initialize the ProgramHandler class and starts the user flow.
 
         Provides:
         - logging options
@@ -57,7 +56,7 @@ class ProgramHandler():
             filemode="a",
             format="{asctime} - {levelname} - {message}",
             style="{",
-            level=logging.DEBUG,
+            level=logging.INFO,
             datefmt="%Y-%m-%d %H:%M",
         )
 
@@ -77,6 +76,7 @@ class ProgramHandler():
         #Instances creation and program start
 
         try:
+
             self.file_handler = FileHandler(self)
             self.inventory = Inventory(self)
             self.sales_manager = SalesManager(self)
@@ -86,33 +86,35 @@ class ProgramHandler():
             self._start_program()
             
         except Exception as e:
-            logging.error(f"An error occured: {e}")
-            self.exit_program_with_error()
+
+            self.exit_program_with_error(exception=e)
 
     def _start_program(self):
         """
-        Starts the program by loading the inventory and starting the interaction.
+        Starts the program by loading the inventory and starting the user interaction.
         """
         try:
+
             self._load_inventory()
             self._start_interaction()
+
         except Exception as e:
-            logging.error(f"An error occured: {e}")
-            self.exit_program_with_error()
+
+            self.exit_program_with_error(exception=e)
 
     def _load_inventory(self):
         """
-        Check if the file exists and is readable, then opens it for streaming.
+        Check if the file exists and is readable, then opens it for streaming. See FileHandler.py for more information.
 
         If it does not exist or if it can't be decoded, a new file is created and the old renamed.
         """
         
         try:
+
             self.file_handler.load_file()
 
         except json.JSONDecodeError as e:
-            logging.error("File JSON is not consistent.")
-            logging.warning("Creating new file...")
+            logging.error("JSON File is not consistent, recreating.")
 
             self.file_handler.close_file()
             self.file_handler.file_stream = None #reinitialize file handler
@@ -120,10 +122,12 @@ class ProgramHandler():
             self.file_handler.initialize_file()
 
         except FileNotFoundError as e:
-            logging.info("File does not exist. Creating...")
+
+            logging.info("File does not exist. Creating.")
             self.file_handler.initialize_file()
 
         except Exception as e:
+
             self.exit_program_with_error(exception=e)
 
     def show_help(self):
@@ -140,7 +144,6 @@ class ProgramHandler():
         print("• chiudi: esci dal programma")
         print("\n")
 
-
     def exit_program(self, message="Arrivederci, e grazie per aver usato il programma!"):
         """
         Exits the program with a farewell message, saving the file.
@@ -148,20 +151,30 @@ class ProgramHandler():
         Args:
         message (str): The farewell message to be displayed. Defaults to a sample.
         """
+
         self.file_handler.save_file()
         print(message)
         sys.exit(0)
 
     def exit_program_with_error(self, exception="Si è verificato un errore, uscita dall'app in corso.."):
         """
-        Exits the program with an error message.
+        Exits (sys.exit(0)) the program with an error message.
+
+        Args:
+        exception (str): The error message to be displayed. Defaults to a sample.
         """
+
         logging.critical(f"An error occured, stopping program: {exception}")
         self.exit_program(message=exception)
 
     def _create_random_string(length=8):
         """
         Creates a random string.
+
+        Args:
+        lenght (str): Defaults to 8. The lenght of the random string.
+
+        Returns the random string generated.
         """
 
         letters = string.ascii_lowercase
@@ -170,6 +183,15 @@ class ProgramHandler():
         return result_str
     
     def _can_cast(self, source, dest_type):
+        """
+        Checks if specified source can be casted to dest_type.
+
+        Args:
+        source (object): The object to try.
+        dest_type (type()): The type to try casting source into.
+
+        Returns True if casting happens without raising exceptions, False otherwise.
+        """
         try:
             dest_type(source)
             return True
@@ -179,13 +201,13 @@ class ProgramHandler():
         
     def get_input_from_user(self, attribute):
         """
-        Gets user input for specified attribute. 
+        Gets user input for specified attribute. Handles input checks.
 
         Args:
-        attribute (str): The attribute to get.
+        attribute (str): The attribute to get from user input.
 
         Returns:
-        str: the user input, preprocessed if applicable.
+        str: the user input, preprocessed and verified if applicable.
         """
 
         try:
@@ -248,15 +270,22 @@ class ProgramHandler():
                 return product_sale_price
 
         except ValueError as e:
-            print(e)
+
+            logging.error(f"An error occurred: {e}")
+
+        except Exception as e:
+
+            self.exit_program_with_error(exception=e)
 
     def _start_interaction(self):
         """
         Starts the main loop of the program after file import or creation.
         """
+
         logging.info("Starting user interaction...")
 
         try:
+
             cmd = None
             print("Benvenuto in GreenVault, il tuo software di gestione per negozi di prodotti vegani!")
 
@@ -307,7 +336,7 @@ class ProgramHandler():
                         self.sales_manager.record_sale(product_list, product_quantities, product_indexes)
 
                     except ValueError as e:
-                        print(e)
+                        logging.error(f"An error occurred: {e}")
 
                     except Exception as e:
                         self.exit_program_with_error(exception=e)
@@ -317,9 +346,8 @@ class ProgramHandler():
                     # ...
 
                 elif cmd=="profitti":
-                    pass
                     # mostra profitti netti e lordi
-                    # ...
+                    print(f"Profitto: lordo=€{self.sales_manager.gross_profit()} netto=€{self.sales_manager.net_profit()}")
 
                 elif cmd=="aggiungi":
                     # aggiungi un prodotto al magazzino
@@ -343,7 +371,10 @@ class ProgramHandler():
                             self.inventory.update_product(product_index, product_quantity)
 
                     except ValueError as e:
-                        print(e)
+                        logging.error(f"An error occurred: {e}")
+
+                    except Exception as e:
+                        self.exit_program_with_error(exception=e)
 
                 elif cmd=="elenca":
                     # elenca tutti i prodotti nel magazzino
@@ -358,12 +389,13 @@ class ProgramHandler():
                     self.exit_program()
 
                 else:
-                    # comando non valido
-                    # mostra messaggio di aiuto
+                    # comando non valido, mostra messaggio di aiuto
+
                     print("Comando non valido")
                     self.show_help()
 
         except Exception as e:
+
             self.exit_program_with_error(exception=e)
 
 
