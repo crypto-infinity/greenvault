@@ -55,7 +55,7 @@ class SalesManager():
                 #A negative Profit is considered a loss in the specified sale.
                 product_sale["net_profit"] += current_item_price - current_item_cost
 
-                print(f"{product_sale['quantity'][i]} X {product_sale['product'][i]} : €{current_item_price}", end="")
+                print(f" • {product_sale['quantity'][i]} X {product_sale['product'][i]} : €{current_item_price:.2f}")
 
                 remaining_quantity = self.HANDLER_REF.database["products"][product_indexes[i]]["quantity"] - product_sale["quantity"][i]
                 
@@ -69,6 +69,7 @@ class SalesManager():
             self.HANDLER_REF.database["gross_profits"] += product_sale["total_gross_sell_value"]
             self.HANDLER_REF.database["net_profits"] += product_sale["net_profit"]
 
+            print("\n")
             print(f"Totale: €{product_sale['total_gross_sell_value']:.2f}\n")
 
             self.HANDLER_REF.file_handler.save_file()

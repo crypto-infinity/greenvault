@@ -56,7 +56,7 @@ class ProgramHandler():
             filemode="a",
             format="{asctime} - {levelname} - {message}",
             style="{",
-            level=logging.INFO,
+            level=logging.DEBUG,
             datefmt="%Y-%m-%d %H:%M",
         )
 
@@ -83,13 +83,13 @@ class ProgramHandler():
 
             logging.debug("Instances FileHandler, Inventory and SalesManager created.")
 
-            self._start_program()
+            self.start_program()
             
         except Exception as e:
 
             self.exit_program_with_error(exception=e)
 
-    def _start_program(self):
+    def start_program(self):
         """
         Starts the program by loading the inventory and starting the user interaction.
         """
@@ -135,7 +135,7 @@ class ProgramHandler():
         Show an help menu with all possible commands.
         """
 
-        print("I comandi disponibili sono i seguenti:")
+        print("I comandi disponibili sono i seguenti:\n")
         print("• aggiungi: aggiungi un prodotto al magazzino")
         print("• elenca: elenca i prodotti in magazzino")
         print("• vendita: registra una vendita effettuata")
@@ -287,11 +287,11 @@ class ProgramHandler():
         try:
 
             cmd = None
-            print("Benvenuto in GreenVault, il tuo software di gestione per negozi di prodotti vegani!")
+            print("Benvenuto in GreenVault, il tuo software di gestione per negozi di prodotti vegani! ")
 
             while cmd != "chiudi":
                 
-                cmd = input("Inserisci un comando: ")
+                cmd = input("\nInserisci un comando: ")
 
                 if cmd=="vendita":
 
@@ -301,6 +301,7 @@ class ProgramHandler():
                         product_indexes = []
 
                         user_key = "si"
+                        error = False
 
                         while(user_key == "si"):
 
@@ -311,14 +312,21 @@ class ProgramHandler():
                             if(product_index == None):
                                 logging.info(f"Product not available in store.")
                                 print(f"Il prodotto {product_name} non è disponibile a magazzino, perciò non è possibile procedere con la vendita.")
+                                error = True
+                                break
+
+                            if(any(x == product_name for x in product_list)):
+                                logging.info(f"Product has already been added into shopping cart.")
+                                print(f"Il prodotto {product_name} è già stato aggiunto al carrello.")
                                 continue
-                            
+
                             product_quantity = self.get_input_from_user("product_quantity")
 
                             if(product_quantity > self.database["products"][product_index]["quantity"]):
                                 logging.info(f"Product does not have enough quantity for specified sell.")
                                 print(f"Il prodotto {product_name} non possiede a magazzino sufficienti scorte, perciò non è possibile procedere con la vendita.")
-                                continue
+                                error = True
+                                break
 
                             logging.info(f"Product {product_name} available for sell for quantity {product_quantity}")
 
@@ -332,8 +340,10 @@ class ProgramHandler():
                                 print("Comando non valido.")
                                 user_key = input("Aggiungere un altro prodotto ? (si/no): ")
                     
-
-                        self.sales_manager.record_sale(product_list, product_quantities, product_indexes)
+                        if(error == False):
+                            self.sales_manager.record_sale(product_list, product_quantities, product_indexes)
+                        else:
+                            logging.debug("Bad user input.")
 
                     except ValueError as e:
                         logging.error(f"An error occurred: {e}")
@@ -347,7 +357,10 @@ class ProgramHandler():
 
                 elif cmd=="profitti":
                     # mostra profitti netti e lordi
-                    print(f"Profitto: lordo=€{self.sales_manager.gross_profit()} netto=€{self.sales_manager.net_profit()}")
+                    gross_profit = self.sales_manager.gross_profit()
+                    net_profit = self.sales_manager.net_profit()
+
+                    print(f"Profitto: lordo=€{gross_profit:.2f} netto=€{net_profit:.2f}")
 
                 elif cmd=="aggiungi":
                     # aggiungi un prodotto al magazzino

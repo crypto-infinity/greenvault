@@ -1,19 +1,31 @@
 {
     "products": [
         {
-            "name": "insalata",
-            "quantity": 8,
-            "purchase_price": 2.5,
-            "sale_price": 5.0
+            "name": "latte di soia",
+            "quantity": 2,
+            "purchase_price": 5.0,
+            "sale_price": 6.0
         },
         {
-            "name": "verdura",
-            "quantity": 4,
-            "purchase_price": 0.9,
-            "sale_price": 0.8
+            "name": "seitan",
+            "quantity": 2,
+            "purchase_price": 5.0,
+            "sale_price": 6.0
         }
     ],
     "sales": [
+        {
+            "product": [
+                "latte di soia",
+                "tofu"
+            ],
+            "quantity": [
+                5,
+                2
+            ],
+            "total_gross_sell_value": 15.38,
+            "net_profit": 6.98
+        },
         {
             "product": [
                 "seitan"
@@ -21,20 +33,102 @@
             "quantity": [
                 5
             ],
-            "total_gross_sell_value": 35.0,
-            "net_profit": 10.0
+            "total_gross_sell_value": 27.450000000000003,
+            "net_profit": 12.450000000000003
         },
         {
             "product": [
-                "verdura"
+                "latte di soia",
+                "seitan"
+            ],
+            "quantity": [
+                5,
+                10
+            ],
+            "total_gross_sell_value": 21.0,
+            "net_profit": 9.0
+        },
+        {
+            "product": [
+                "latte di soia",
+                "seitan"
+            ],
+            "quantity": [
+                5,
+                10
+            ],
+            "total_gross_sell_value": 21.0,
+            "net_profit": 9.0
+        },
+        {
+            "product": [
+                "latte di soia"
             ],
             "quantity": [
                 5
             ],
-            "total_gross_sell_value": 4.0,
-            "net_profit": -0.5
+            "total_gross_sell_value": 7.0,
+            "net_profit": 3.0
+        },
+        {
+            "product": [
+                "seitan"
+            ],
+            "quantity": [
+                5
+            ],
+            "total_gross_sell_value": 30.0,
+            "net_profit": 5.0
+        },
+        {
+            "product": [
+                "seitan",
+                "latte di soia"
+            ],
+            "quantity": [
+                5,
+                5
+            ],
+            "total_gross_sell_value": 60.0,
+            "net_profit": 10.0
+        },
+        {
+            "product": [
+                "seitan",
+                "latte di soia"
+            ],
+            "quantity": [
+                1,
+                1
+            ],
+            "total_gross_sell_value": 12.0,
+            "net_profit": 2.0
+        },
+        {
+            "product": [
+                "seitan",
+                "latte di soia"
+            ],
+            "quantity": [
+                1,
+                1
+            ],
+            "total_gross_sell_value": 12.0,
+            "net_profit": 2.0
+        },
+        {
+            "product": [
+                "seitan",
+                "latte di soia"
+            ],
+            "quantity": [
+                1,
+                1
+            ],
+            "total_gross_sell_value": 12.0,
+            "net_profit": 2.0
         }
     ],
-    "gross_profits": 39.0,
-    "net_profits": 9.5
+    "gross_profits": 217.83,
+    "net_profits": 61.43000000000001
 }

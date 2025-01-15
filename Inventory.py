@@ -52,7 +52,7 @@ class Inventory():
         self.HANDLER_REF.database["products"].append(new_product)
         logging.info(f"Added product {name}.")
 
-        print(f"AGGIUNTO: {name} X {quantity}")
+        print(f"AGGIUNTO: {quantity} X {name}")
 
         self.HANDLER_REF.file_handler.save_file()
 
